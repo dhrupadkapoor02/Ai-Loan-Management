@@ -1,0 +1,22 @@
+// Prisma schema for the AI-Powered Finance & Loan Management System
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Models are added incrementally, module by module, so each migration stays
+// small and reviewable:
+//   Module 2  -> User, RefreshToken
+//   Module 3  -> Category, Income, Expense, Budget, SavingsGoal
+//   Module 4  -> Loan, LoanApplication
+//   Module 5  -> CreditScore
+//   Module 6  -> FinancialReport
+//   Module 8  -> Notification
+// ---------------------------------------------------------------------------
