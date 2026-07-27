@@ -11,6 +11,11 @@ import { notFoundHandler, errorHandler } from "./middleware/errorHandler.js";
 
 export const app = express();
 
+// Render (and most PaaS hosts) sit behind a reverse proxy that terminates
+// TLS. Without this, req.ip and req.secure would reflect the proxy, not the
+// real client, which breaks rate limiting and the `secure` cookie flag.
+app.set("trust proxy", 1);
+
 // ---------------------------------------------------------------------------
 // Security & parsing middleware
 // ---------------------------------------------------------------------------

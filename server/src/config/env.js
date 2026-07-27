@@ -13,7 +13,7 @@ import "dotenv/config";
  * as new features (mail, AI, etc.) come online.
  */
 
-const required = ["DATABASE_URL"];
+const required = ["DATABASE_URL", "JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"];
 
 const missing = required.filter((key) => !process.env[key]);
 
@@ -23,6 +23,18 @@ if (missing.length > 0) {
   console.error(
     `[env] Missing required environment variable(s): ${missing.join(", ")}\n` +
       `Copy server/.env.example to server/.env and fill in the values.`
+  );
+  process.exit(1);
+}
+
+if (
+  process.env.NODE_ENV === "production" &&
+  (process.env.JWT_ACCESS_SECRET.length < 32 || process.env.JWT_REFRESH_SECRET.length < 32)
+) {
+  // eslint-disable-next-line no-console
+  console.error(
+    "[env] JWT_ACCESS_SECRET / JWT_REFRESH_SECRET look too short for production. " +
+      "Use at least 32 random characters (e.g. `openssl rand -hex 32`)."
   );
   process.exit(1);
 }

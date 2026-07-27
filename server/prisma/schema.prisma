@@ -13,10 +13,73 @@ datasource db {
 // ---------------------------------------------------------------------------
 // Models are added incrementally, module by module, so each migration stays
 // small and reviewable:
-//   Module 2  -> User, RefreshToken
+//   Module 2  -> User, RefreshToken            <-- current
 //   Module 3  -> Category, Income, Expense, Budget, SavingsGoal
 //   Module 4  -> Loan, LoanApplication
 //   Module 5  -> CreditScore
 //   Module 6  -> FinancialReport
 //   Module 8  -> Notification
 // ---------------------------------------------------------------------------
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String // bcrypt hash, never the plaintext
+
+  role Role @default(USER)
+
+  // Email verification
+  isEmailVerified         Boolean   @default(false)
+  emailVerificationToken  String? // sha256 hash of the token emailed to the user
+  emailVerificationExpiry DateTime?
+
+  // Password reset
+  passwordResetToken  String? // sha256 hash of the token emailed to the user
+  passwordResetExpiry DateTime?
+
+  // Account status — lets admins disable a user without deleting them
+  isActive Boolean @default(true)
+
+  refreshTokens RefreshToken[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@map("users")
+}
+
+/// One row per issued refresh token, so any individual session/device can be
+/// revoked (logout, "log out of all devices", or automatic rotation on
+/// reuse-detection) without invalidating the user's password or other
+/// sessions.
+model RefreshToken {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // We never store the raw refresh token — only its sha256 hash — so a DB
+  // leak alone can't be used to impersonate a user.
+  tokenHash String @unique
+
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+
+  // Set when this token is rotated into a new one, so we can detect and
+  // react to refresh-token reuse (a strong signal of token theft).
+  replacedByTokenHash String?
+
+  userAgent String?
+  ipAddress String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
