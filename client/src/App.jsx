@@ -12,6 +12,11 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
+import IncomePage from "./pages/IncomePage";
+import ExpensePage from "./pages/ExpensePage";
+import BudgetsPage from "./pages/BudgetsPage";
+import SavingsGoalsPage from "./pages/SavingsGoalsPage";
+import TransactionsPage from "./pages/TransactionsPage";
 
 function App() {
   return (
@@ -34,6 +39,11 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/incomes" element={<IncomePage />} />
+              <Route path="/expenses" element={<ExpensePage />} />
+              <Route path="/budgets" element={<BudgetsPage />} />
+              <Route path="/savings-goals" element={<SavingsGoalsPage />} />
+              <Route path="/transactions" element={<TransactionsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Route>
           </Route>

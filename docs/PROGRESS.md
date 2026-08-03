@@ -100,8 +100,76 @@ against your real database.
    devices.
 5. Refresh the page — you should stay logged in (silent session restore).
 
-## Module 3 — Finance Core (next)
-- [ ] `Category`, `Income`, `Expense`, `Budget`, `SavingsGoal` Prisma models
-- [ ] Dashboard stats + Chart.js visualizations
-- [ ] Income/expense CRUD, categories, monthly budgets, savings goals
-- [ ] Transaction history with filtering
+## Module 3 — Finance Core (done)
+- [x] `Category` (system default + user custom), `Income`, `Expense`,
+      `Budget`, `SavingsGoal` Prisma models
+- [x] Categories: list (defaults + custom merged), create/update/delete
+      custom categories (defaults are protected from modification)
+- [x] Income: full CRUD, filterable/paginated listing (date range, category)
+- [x] Expense: full CRUD, filterable/paginated listing
+- [x] Monthly budgets: set/update per category, auto-computed spent /
+      remaining / percentUsed / isOverBudget against real expense data
+- [x] Savings goals: CRUD + atomic "contribute funds" (DB-level increment,
+      not read-then-write, so concurrent contributions can't clobber each
+      other), auto-marks `isCompleted` once target is reached
+- [x] Transaction history: combined income+expense feed, filterable by
+      type/category/date range, correctly paginated across both tables
+      via a parameterized raw-SQL UNION (Prisma's query builder can't
+      paginate across two models on its own)
+- [x] Dashboard aggregation: summary stats + all 4 chart datasets
+      (expense distribution, income vs expense, monthly expenses trend,
+      cumulative savings trend — last 6 months)
+- [x] `prisma/seed.js`: seeds sensible default income/expense categories
+- [x] Frontend: Income/Expense pages (table + modal form), Budgets page
+      (progress bars, month/year picker), Savings Goals page (progress +
+      contribute), Transactions page (filterable history), Dashboard
+      rewritten with real Chart.js visuals (Doughnut, Bar, 2x Line)
+
+### Design decisions worth knowing about
+- `Budget.categoryId` is **required**, not nullable. I originally modeled
+  an "overall" budget with a null categoryId, then caught that a nullable
+  column inside a composite `@@unique` is a Postgres footgun — Postgres
+  never considers two NULLs equal, so uniqueness silently wouldn't be
+  enforced for multiple "overall" budgets. Every budget is category-scoped
+  instead.
+- All monetary amounts are Prisma `Decimal` in the DB (exact, no float
+  rounding errors) but converted to plain JS numbers before leaving the
+  service layer (`utils/serialize.js`), so the frontend/Chart.js never
+  has to deal with Decimal-as-string quirks.
+- Category ownership check (`assertUsableCategory` in
+  `category.service.js`) is shared by income/expense/budget services —
+  a categoryId must either be a system default (`userId: null`) or
+  belong to the authenticated user, and must match the expected
+  INCOME/EXPENSE type.
+
+### How to apply the Module 3 migration
+```bash
+cd server
+npm run prisma:migrate -- --name add_finance_core
+npm run prisma:seed
+```
+Not run in the sandbox (no DB/network access there) — run against your
+real database, same as Module 2's migration.
+
+### How to test locally
+1. Log in, go to **Income** → add a couple of income records with
+   different categories/dates.
+2. Go to **Expenses** → add several expenses across different categories
+   and dates (some in the current month, some in previous months, to see
+   the trend charts populate).
+3. Go to **Budgets** → set a monthly limit for a category you've spent
+   on; confirm the progress bar and over-budget warning reflect real
+   spending.
+4. Go to **Savings Goals** → create a goal, contribute funds, confirm it
+   marks itself completed once the target is reached.
+5. Go to **Transactions** → confirm income and expenses appear merged,
+   sorted by date, filterable by type.
+6. Go to **Dashboard** → confirm all 4 charts render with real data and
+   change when you switch the month/year selector.
+
+## Module 4 — Loans (next)
+- [ ] `Loan`, `LoanApplication` Prisma models
+- [ ] EMI Calculator
+- [ ] Loan Eligibility Checker (using income/expense/credit data)
+- [ ] Loan Comparison
+- [ ] Loan Application Tracking

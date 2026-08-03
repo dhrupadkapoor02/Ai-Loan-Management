@@ -30,6 +30,21 @@ export default function DashboardLayout() {
             <NavLink to="/dashboard" className={navLinkClass} end>
               Dashboard
             </NavLink>
+            <NavLink to="/incomes" className={navLinkClass}>
+              Income
+            </NavLink>
+            <NavLink to="/expenses" className={navLinkClass}>
+              Expenses
+            </NavLink>
+            <NavLink to="/budgets" className={navLinkClass}>
+              Budgets
+            </NavLink>
+            <NavLink to="/savings-goals" className={navLinkClass}>
+              Savings
+            </NavLink>
+            <NavLink to="/transactions" className={navLinkClass}>
+              Transactions
+            </NavLink>
             <NavLink to="/profile" className={navLinkClass}>
               Profile
             </NavLink>

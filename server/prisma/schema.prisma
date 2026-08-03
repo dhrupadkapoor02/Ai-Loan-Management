@@ -13,13 +13,125 @@ datasource db {
 // ---------------------------------------------------------------------------
 // Models are added incrementally, module by module, so each migration stays
 // small and reviewable:
-//   Module 2  -> User, RefreshToken            <-- current
-//   Module 3  -> Category, Income, Expense, Budget, SavingsGoal
+//   Module 2  -> User, RefreshToken
+//   Module 3  -> Category, Income, Expense, Budget, SavingsGoal   <-- current
 //   Module 4  -> Loan, LoanApplication
 //   Module 5  -> CreditScore
 //   Module 6  -> FinancialReport
 //   Module 8  -> Notification
 // ---------------------------------------------------------------------------
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+/// A category is either a system default (userId is null, visible to every
+/// user, seeded once via prisma/seed.js) or a user-created custom category.
+/// Both share one table so income/expense records only ever need a single
+/// categoryId FK regardless of which kind it points to.
+model Category {
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name      String
+  type      CategoryType
+  icon      String?
+  isDefault Boolean @default(false)
+
+  incomes  Income[]
+  expenses Expense[]
+  budgets  Budget[]
+
+  createdAt DateTime @default(now())
+
+  // A user can't have two categories with the same name+type (and default
+  // categories, userId = null, follow the same uniqueness rule among
+  // themselves).
+  @@unique([userId, name, type])
+  @@index([userId])
+  @@map("categories")
+}
+
+model Income {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  amount      Decimal  @db.Decimal(12, 2)
+  source      String?
+  description String?
+  date        DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date])
+  @@map("incomes")
+}
+
+model Expense {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  amount        Decimal  @db.Decimal(12, 2)
+  paymentMethod String?
+  description   String?
+  date          DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date])
+  @@map("expenses")
+}
+
+/// One budget row per (user, category, month, year).
+model Budget {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  amount Decimal @db.Decimal(12, 2)
+  month  Int // 1-12
+  year   Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, categoryId, month, year])
+  @@index([userId, year, month])
+  @@map("budgets")
+}
+
+model SavingsGoal {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title         String
+  targetAmount  Decimal   @db.Decimal(12, 2)
+  currentAmount Decimal   @default(0) @db.Decimal(12, 2)
+  targetDate    DateTime?
+  isCompleted   Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("savings_goals")
+}
 
 enum Role {
   USER
@@ -47,6 +159,12 @@ model User {
   isActive Boolean @default(true)
 
   refreshTokens RefreshToken[]
+
+  categories   Category[]
+  incomes      Income[]
+  expenses     Expense[]
+  budgets      Budget[]
+  savingsGoals SavingsGoal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
