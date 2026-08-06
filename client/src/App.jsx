@@ -17,6 +17,11 @@ import ExpensePage from "./pages/ExpensePage";
 import BudgetsPage from "./pages/BudgetsPage";
 import SavingsGoalsPage from "./pages/SavingsGoalsPage";
 import TransactionsPage from "./pages/TransactionsPage";
+import EmiCalculatorPage from "./pages/EmiCalculatorPage";
+import MyLoansPage from "./pages/MyLoansPage";
+import LoanEligibilityPage from "./pages/LoanEligibilityPage";
+import LoanComparisonPage from "./pages/LoanComparisonPage";
+import LoanApplicationsPage from "./pages/LoanApplicationsPage";
 
 function App() {
   return (
@@ -44,6 +49,11 @@ function App() {
               <Route path="/budgets" element={<BudgetsPage />} />
               <Route path="/savings-goals" element={<SavingsGoalsPage />} />
               <Route path="/transactions" element={<TransactionsPage />} />
+              <Route path="/emi-calculator" element={<EmiCalculatorPage />} />
+              <Route path="/my-loans" element={<MyLoansPage />} />
+              <Route path="/loan-eligibility" element={<LoanEligibilityPage />} />
+              <Route path="/loan-comparison" element={<LoanComparisonPage />} />
+              <Route path="/loan-applications" element={<LoanApplicationsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Route>
           </Route>

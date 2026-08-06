@@ -8,6 +8,8 @@ import budgetRoutes from "./budget.routes.js";
 import savingsGoalRoutes from "./savingsGoal.routes.js";
 import transactionRoutes from "./transaction.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
+import loanRoutes from "./loan.routes.js";
+import loanApplicationRoutes from "./loanApplication.routes.js";
 
 const router = Router();
 
@@ -20,5 +22,7 @@ router.use("/budgets", budgetRoutes);
 router.use("/savings-goals", savingsGoalRoutes);
 router.use("/transactions", transactionRoutes);
 router.use("/dashboard", dashboardRoutes);
+router.use("/loans", loanRoutes);
+router.use("/loan-applications", loanApplicationRoutes);
 
 export default router;

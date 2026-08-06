@@ -167,9 +167,70 @@ real database, same as Module 2's migration.
 6. Go to **Dashboard** → confirm all 4 charts render with real data and
    change when you switch the month/year selector.
 
-## Module 4 — Loans (next)
-- [ ] `Loan`, `LoanApplication` Prisma models
-- [ ] EMI Calculator
-- [ ] Loan Eligibility Checker (using income/expense/credit data)
-- [ ] Loan Comparison
-- [ ] Loan Application Tracking
+## Module 4 — Loans (done)
+- [x] `Loan` model — tracks loans the user currently holds (saved from the
+      EMI calculator), with `isActive` marking whether it counts toward
+      debt obligations
+- [x] `LoanApplication` model — a formal application workflow
+      (PENDING → UNDER_REVIEW → APPROVED/REJECTED/CANCELLED); user-facing
+      actions this module are submit + cancel, admin approve/reject is
+      reserved for Module 10 (the service function `reviewApplication`
+      already exists, just isn't routed yet)
+- [x] EMI Calculator — standard reducing-balance formula, full
+      amortization schedule, principal-vs-interest doughnut chart,
+      "save this loan" flow
+- [x] Loan Eligibility Checker — a transparent debt-to-income heuristic
+      using the user's **real** recorded income (last 3 months average)
+      and active saved loans; clearly labeled as an estimate, not a
+      lender guarantee
+- [x] Loan Comparison — 2 to 5 offers side by side with an EMI/interest
+      bar chart
+- [x] Loan Application Tracking — submit, list, view, cancel (only while
+      PENDING/UNDER_REVIEW)
+- [x] Frontend: EMI Calculator, My Loans, Eligibility Checker, Compare
+      Loans, Applications pages
+- [x] `DashboardLayout` redesigned as a grouped sidebar (Overview /
+      Finance / Loans), since the flat top nav from Module 1-3 didn't
+      scale past ~12 destinations. Same color tokens/patterns as before —
+      no visual identity change, just a structural one.
+
+### Design decisions worth knowing about
+- `loanMath.js` (EMI formula, amortization, inverse-EMI) was verified by
+  actually running it in the sandbox with Node — a ₹5,00,000 loan at 8.5%
+  over 60 months computes to a ₹10,258.27/month EMI, the amortization
+  schedule's principal components sum exactly back to ₹5,00,000, and the
+  inverse-EMI function correctly recovers the original principal from a
+  target EMI (off by ₹0.21 due to rounding, which is expected).
+- The eligibility checker is explicitly a simplified heuristic (50%
+  debt-to-income threshold, most lenders use far more inputs) — the API
+  response includes an `assumptions.note` field and the UI surfaces it,
+  so it's never presented as a guarantee.
+
+### How to apply the Module 4 migration
+```bash
+cd server
+npx prisma migrate dev --name add_loans
+```
+Not run in the sandbox (no DB/network access there) — run against your
+real database.
+
+### How to test locally
+1. Go to **EMI Calculator** → enter a loan amount/rate/tenure, confirm
+   the EMI, total interest, and amortization schedule look right; try
+   "Save this loan".
+2. Go to **My Loans** → confirm the saved loan shows up; try toggling
+   active/inactive and deleting.
+3. Go to **Eligibility Checker** → enter a requested amount; confirm it
+   reflects your actual income (add some Income records first if you
+   haven't) and any active loans from step 2.
+4. Go to **Compare Loans** → add/remove offers, confirm the chart and
+   table update.
+5. Go to **Applications** → submit a new application, confirm it shows
+   as PENDING, then cancel it and confirm the Cancel button disappears
+   once cancelled.
+
+## Module 5 — Credit Score (next)
+- [ ] `CreditScore` Prisma model
+- [ ] Credit Score Estimator (heuristic based on income stability, debt
+      obligations, budget adherence, savings behavior)
+- [ ] Credit Score History + trend chart

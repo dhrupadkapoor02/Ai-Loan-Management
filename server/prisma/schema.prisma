@@ -14,8 +14,8 @@ datasource db {
 // Models are added incrementally, module by module, so each migration stays
 // small and reviewable:
 //   Module 2  -> User, RefreshToken
-//   Module 3  -> Category, Income, Expense, Budget, SavingsGoal   <-- current
-//   Module 4  -> Loan, LoanApplication
+//   Module 3  -> Category, Income, Expense, Budget, SavingsGoal
+//   Module 4  -> Loan, LoanApplication                             <-- current
 //   Module 5  -> CreditScore
 //   Module 6  -> FinancialReport
 //   Module 8  -> Notification
@@ -160,11 +160,13 @@ model User {
 
   refreshTokens RefreshToken[]
 
-  categories   Category[]
-  incomes      Income[]
-  expenses     Expense[]
-  budgets      Budget[]
-  savingsGoals SavingsGoal[]
+  categories       Category[]
+  incomes          Income[]
+  expenses         Expense[]
+  budgets          Budget[]
+  savingsGoals     SavingsGoal[]
+  loans            Loan[]
+  loanApplications LoanApplication[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -200,4 +202,82 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+enum LoanType {
+  PERSONAL
+  HOME
+  AUTO
+  EDUCATION
+  BUSINESS
+  OTHER
+}
+
+enum LoanApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+/// Represents a loan the user currently holds (or is tracking), saved from
+/// the EMI calculator. `isActive` loans count as existing debt obligations
+/// when checking eligibility for a *new* loan application.
+model Loan {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name   String? // user-given nickname, e.g. "Home Loan - SBI"
+  lender String?
+  type   LoanType
+
+  principal     Decimal @db.Decimal(14, 2)
+  interestRate  Decimal @db.Decimal(5, 2) // annual %, e.g. 8.50
+  tenureMonths  Int
+  emiAmount     Decimal @db.Decimal(12, 2) // computed at save time, cached for quick reads
+  totalInterest Decimal @db.Decimal(14, 2)
+  totalPayment  Decimal @db.Decimal(14, 2)
+
+  isActive Boolean @default(true)
+  notes    String?
+
+  applications LoanApplication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isActive])
+  @@map("loans")
+}
+
+/// A formal application for a *new* loan, distinct from Loan (which tracks
+/// loans the user already has). Approve/reject is an admin action, added in
+/// the Admin module — user-facing actions here are submit + cancel.
+model LoanApplication {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  loanId String?
+  loan   Loan?   @relation(fields: [loanId], references: [id], onDelete: SetNull)
+
+  type            LoanType
+  amountRequested Decimal  @db.Decimal(14, 2)
+  interestRate    Decimal  @db.Decimal(5, 2)
+  tenureMonths    Int
+  purpose         String?
+
+  status LoanApplicationStatus @default(PENDING)
+
+  reviewedBy   String? // admin User.id
+  reviewNotes  String?
+  reviewedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@map("loan_applications")
 }

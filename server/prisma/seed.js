@@ -26,48 +26,43 @@ const DEFAULT_EXPENSE_CATEGORIES = [
   { name: "Other Expense", icon: "more-horizontal" },
 ];
 
-async function seedCategories(categories, type) {
-  for (const { name, icon } of categories) {
-    // Check if the default category already exists
+async function seedCategories(list, type) {
+  for (const { name, icon } of list) {
+    // Prisma's generated compound-unique input type won't accept `null`
+    // for a nullable field inside upsert's `where` clause, even though the
+    // schema permits it — so we do the find-then-create/update manually
+    // instead of relying on upsert's compound-key shortcut.
     const existing = await prisma.category.findFirst({
-      where: {
-        userId: null,
-        name,
-        type,
-      },
+      where: { userId: null, name, type },
     });
 
-    if (!existing) {
-      await prisma.category.create({
-        data: {
-          userId: null,
-          name,
-          type,
-          icon,
-          isDefault: true,
-        },
+    if (existing) {
+      await prisma.category.update({
+        where: { id: existing.id },
+        data: { icon, isDefault: true },
       });
-
-      console.log(`✓ Created ${type}: ${name}`);
     } else {
-      console.log(`• Skipped ${type}: ${name} (already exists)`);
+      await prisma.category.create({
+        data: { userId: null, name, type, icon, isDefault: true },
+      });
     }
   }
 }
 
 async function main() {
+  // eslint-disable-next-line no-console
   console.log("[seed] Seeding default categories...");
-
   await seedCategories(DEFAULT_INCOME_CATEGORIES, "INCOME");
   await seedCategories(DEFAULT_EXPENSE_CATEGORIES, "EXPENSE");
-
+  // eslint-disable-next-line no-console
   console.log(
-    `[seed] Done! Seeded ${DEFAULT_INCOME_CATEGORIES.length} income and ${DEFAULT_EXPENSE_CATEGORIES.length} expense categories.`
+    `[seed] Done: ${DEFAULT_INCOME_CATEGORIES.length} income + ${DEFAULT_EXPENSE_CATEGORIES.length} expense categories ready.`
   );
 }
 
 main()
   .catch((err) => {
+    // eslint-disable-next-line no-console
     console.error("[seed] Failed:", err);
     process.exit(1);
   })
