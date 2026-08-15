@@ -5,6 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Finance & Loan Manager</title>
+    <script>
+      // Runs before React mounts so there's no flash of the wrong theme.
+      // Kept in sync with client/src/context/ThemeContext.jsx.
+      (function () {
+        try {
+          var stored = localStorage.getItem("theme");
+          var isDark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (isDark) document.documentElement.classList.add("dark");
+        } catch (e) {
+          /* localStorage unavailable — default to light, no crash */
+        }
+      })();
+    </script>
   </head>
   <body class="h-full">
     <div id="root" class="h-full"></div>

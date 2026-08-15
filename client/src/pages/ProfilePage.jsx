@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import FormField from "../components/FormField";
+import PasswordField from "../components/PasswordField";
 import { useAuth } from "../hooks/useAuth";
 
 export default function ProfilePage() {
@@ -67,15 +68,13 @@ export default function ProfilePage() {
       <section className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
         <h2 className="mb-4 font-semibold">Change password</h2>
         <form className="flex flex-col gap-4" onSubmit={passwordForm.handleSubmit(onChangePassword)}>
-          <FormField
+          <PasswordField
             label="Current password"
-            type="password"
             error={passwordForm.formState.errors.currentPassword}
             registration={passwordForm.register("currentPassword", { required: "Required" })}
           />
-          <FormField
+          <PasswordField
             label="New password"
-            type="password"
             error={passwordForm.formState.errors.newPassword}
             registration={passwordForm.register("newPassword", {
               required: "Required",

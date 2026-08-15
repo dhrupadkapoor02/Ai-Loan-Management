@@ -229,6 +229,39 @@ real database.
    as PENDING, then cancel it and confirm the Cancel button disappears
    once cancelled.
 
+## UI Polish Update (before Module 5)
+Requested: switch currency from USD to INR, and improve the visual feel
+of the app (especially auth pages) without a full redesign.
+
+- [x] **Currency**: `formatCurrency` now uses `en-IN` locale + `INR`
+      currency (₹, with Indian lakh/crore digit grouping — e.g.
+      ₹1,25,000.50). Added `formatCurrencyCompact` for tight spaces
+      (₹12.5L, ₹3.5Cr). Dates also switched to `en-IN` for consistency.
+      Verified with Node that the formatter output is correct.
+- [x] **Dark mode was actually broken** — `dark:` classes existed
+      throughout the app since Module 1, but nothing ever added the
+      `dark` class to `<html>`, so they were dead code. Added a real
+      `ThemeContext` + `ThemeToggle` (sun/moon icon button, in the auth
+      pages and the dashboard header), persisted to `localStorage`,
+      respecting system preference on first visit. Added a small
+      blocking inline script in `index.html` so there's no flash of the
+      wrong theme on page load.
+- [x] **Auth pages** (Login/Register/Forgot/Reset/Verify): subtle
+      gradient background with two slow-drifting blurred blobs, elevated
+      card with backdrop blur, fade-in-up entrance animation, a
+      show/hide password toggle (`PasswordField` component, replacing
+      plain password `FormField`s across Login/Register/Reset/Profile),
+      and slightly more polished buttons (soft shadow + press animation
+      on click).
+- [x] **Modal** (used across Income/Expense/Budgets/Savings/EMI-save/Loan
+      Applications) now fades in the backdrop and scales in the card,
+      instead of appearing instantly — one change, felt everywhere.
+
+Deliberately did **not** touch the overall visual identity/layout of the
+dashboard pages built in Modules 1-3 — the ask was to make things feel
+more polished and interactive, not to redesign an app the user already
+reviewed and approved section by section.
+
 ## Module 5 — Credit Score (next)
 - [ ] `CreditScore` Prisma model
 - [ ] Credit Score Estimator (heuristic based on income stability, debt

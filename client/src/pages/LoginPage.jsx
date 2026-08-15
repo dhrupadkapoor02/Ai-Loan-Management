@@ -3,7 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import AuthLayout from "../layouts/AuthLayout";
 import FormField from "../components/FormField";
+import PasswordField from "../components/PasswordField";
 import { useAuth } from "../hooks/useAuth";
+
+const submitButtonClass =
+  "rounded-md bg-primary-600 py-2 text-sm font-medium text-white shadow-sm shadow-primary-600/20 transition-all duration-150 hover:bg-primary-700 hover:shadow-md hover:shadow-primary-600/30 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -36,9 +40,8 @@ export default function LoginPage() {
           error={errors.email}
           registration={register("email", { required: "Email is required" })}
         />
-        <FormField
+        <PasswordField
           label="Password"
-          type="password"
           error={errors.password}
           registration={register("password", { required: "Password is required" })}
         />
@@ -49,11 +52,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-md bg-primary-600 py-2 text-sm font-medium text-white transition hover:bg-primary-700 disabled:opacity-60"
-        >
+        <button type="submit" disabled={isSubmitting} className={submitButtonClass}>
           {isSubmitting ? "Logging in..." : "Log in"}
         </button>
       </form>

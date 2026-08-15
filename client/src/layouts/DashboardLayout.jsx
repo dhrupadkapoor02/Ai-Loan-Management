@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../hooks/useAuth";
+import ThemeToggle from "../components/ThemeToggle";
 
 const NAV_GROUPS = [
   {
@@ -101,6 +102,7 @@ export default function DashboardLayout() {
           <span className="font-semibold text-primary-700 dark:text-primary-400 lg:hidden">AI Finance</span>
           <div className="ml-auto flex items-center gap-3">
             <span className="hidden text-sm text-gray-400 sm:inline">{user?.email}</span>
+            <ThemeToggle />
             <NavLink to="/profile" className={navLinkClass}>
               Profile
             </NavLink>

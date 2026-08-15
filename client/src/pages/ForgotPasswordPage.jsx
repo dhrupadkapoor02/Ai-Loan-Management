@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
   return (
     <AuthLayout title="Forgot password" subtitle="We'll email you a link to reset it.">
       {sent ? (
-        <p className="text-sm text-gray-600 dark:text-gray-300">
+        <p className="animate-fade-in text-sm text-gray-600 dark:text-gray-300">
           If an account with that email exists, a password reset link is on its way. Check your inbox.
         </p>
       ) : (
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-md bg-primary-600 py-2 text-sm font-medium text-white transition hover:bg-primary-700 disabled:opacity-60"
+            className="rounded-md bg-primary-600 py-2 text-sm font-medium text-white shadow-sm shadow-primary-600/20 transition-all duration-150 hover:bg-primary-700 hover:shadow-md hover:shadow-primary-600/30 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
           >
             {isSubmitting ? "Sending..." : "Send reset link"}
           </button>

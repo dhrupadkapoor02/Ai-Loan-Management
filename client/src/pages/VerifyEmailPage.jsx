@@ -21,14 +21,22 @@ export default function VerifyEmailPage() {
 
   return (
     <AuthLayout title="Email verification">
-      {status === "verifying" && <p className="text-sm text-gray-500">Verifying your email...</p>}
+      {status === "verifying" && (
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <svg className="h-4 w-4 animate-spin text-primary-600" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4z" />
+          </svg>
+          Verifying your email...
+        </div>
+      )}
       {status === "success" && (
-        <p className="text-sm text-green-600 dark:text-green-400">
+        <p className="animate-fade-in text-sm text-green-600 dark:text-green-400">
           Your email has been verified. You can now log in.
         </p>
       )}
       {status === "error" && (
-        <p className="text-sm text-red-600 dark:text-red-400">
+        <p className="animate-fade-in text-sm text-red-600 dark:text-red-400">
           This verification link is invalid or has expired.
         </p>
       )}
