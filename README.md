@@ -17,4 +17,4 @@ Cookie Parser, Express Validator, Nodemailer
 **PDF Reports:** PDFKit
 **Deployment:** Vercel (frontend) · Render (backend) · Neon PostgreSQL (DB)
 
-## new email congigured
+## new email congigured done
